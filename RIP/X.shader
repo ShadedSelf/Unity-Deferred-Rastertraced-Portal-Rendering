@@ -11,7 +11,7 @@
         #pragma surface surf Standard addshadow fullforwardshadows vertex:vert
         #pragma multi_compile_instancing
         #pragma instancing_options procedural:setup
-		#pragma target 5.0
+		//#pragma target 5.0
 
 		float4 data;
 		float _Res;

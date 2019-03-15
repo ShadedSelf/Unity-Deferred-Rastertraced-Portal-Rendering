@@ -371,10 +371,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c07ec1e161cac7340b7d5a9ea1465461, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bpm: 140
-  gain: 0.5
-  signatureHi: 4
-  signatureLo: 4
 --- !u!1 &1848534803
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,5 +428,5 @@ MonoBehaviour:
   scale: {x: 1, y: 1}
   position: {x: 0, y: 0, z: 0}
   wall: 10
-  ground: {fileID: 0}
+  ground: {fileID: 2800000, guid: c6c8a9448e4eed543964630f0732f6c5, type: 3}
   stiff: {fileID: 2800000, guid: 6a48432fe58d96d46948d777ccaf36e0, type: 3}
