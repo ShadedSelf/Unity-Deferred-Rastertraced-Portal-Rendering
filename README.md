@@ -1,1 +1,1 @@
-![ScreenShot](/pics/fract0.png)
+![ScreenShot](/pics/rip.png)
