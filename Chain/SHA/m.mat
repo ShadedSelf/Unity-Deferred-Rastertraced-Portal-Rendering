@@ -61,7 +61,7 @@ Material:
     - _Div: 2.03
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0
     - _GlossyReflections: 1
     - _Lightness: 0.231
     - _Metallic: 0

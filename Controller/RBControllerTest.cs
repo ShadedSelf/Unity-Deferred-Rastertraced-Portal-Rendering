@@ -100,23 +100,23 @@ public class RBControllerTest : MonoBehaviour
             cam.transform.localRotation = Quaternion.Euler(cam.transform.localRotation.eulerAngles.x, 0, 0);
         }
 
-		Ray ray = new Ray(cam.transform.position, -cam.transform.up); //make dummy transform, smooth from last rotation to new, also use the dummy for the camera thing
-		RaycastHit hit = new RaycastHit();
-        if (Physics.Raycast(ray, out hit, 20))
-        {
-            if (Vector3.Dot(hit.normal, -cam.transform.up) < -.999f && Vector3.Dot(hit.normal, transform.up) < .5f)
-            {
-				pivot.localPosition = new Vector3(0, .16f / transform.localScale.y, 0);
-				rb.transform.localScale = new Vector3(transform.localScale.x, Vector3.Distance(hit.point, transform.position), transform.localScale.z);
+		// Ray ray = new Ray(cam.transform.position, -cam.transform.up); //make dummy transform, smooth from last rotation to new, also use the dummy for the camera thing
+		// RaycastHit hit = new RaycastHit();
+        // if (Physics.Raycast(ray, out hit, 20))
+        // {
+        //     if (Vector3.Dot(hit.normal, -cam.transform.up) < -.999f && Vector3.Dot(hit.normal, transform.up) < .5f)
+        //     {
+		// 		pivot.localPosition = new Vector3(0, .16f / transform.localScale.y, 0);
+		// 		rb.transform.localScale = new Vector3(transform.localScale.x, Vector3.Distance(hit.point, transform.position), transform.localScale.z);
 
-				downNormal = new Vector3(
-					(Mathf.Abs(hit.normal.x) < .00001f) ? 0 : -hit.normal.x,
-					(Mathf.Abs(hit.normal.y) < .00001f) ? 0 : -hit.normal.y,
-					(Mathf.Abs(hit.normal.z) < .00001f) ? 0 : -hit.normal.z);
-				rb.rotation = Quaternion.FromToRotation(transform.up, -downNormal) * rb.rotation;
-                cam.transform.rotation = Quaternion.FromToRotation(-downNormal, transform.up) * cam.transform.rotation;
-            }
-        }
+		// 		downNormal = new Vector3(
+		// 			(Mathf.Abs(hit.normal.x) < .00001f) ? 0 : -hit.normal.x,
+		// 			(Mathf.Abs(hit.normal.y) < .00001f) ? 0 : -hit.normal.y,
+		// 			(Mathf.Abs(hit.normal.z) < .00001f) ? 0 : -hit.normal.z);
+		// 		rb.rotation = Quaternion.FromToRotation(transform.up, -downNormal) * rb.rotation;
+        //         cam.transform.rotation = Quaternion.FromToRotation(-downNormal, transform.up) * cam.transform.rotation;
+        //     }
+        // }
 
         if (floored && mag > 0) { mag = 0; }
         rb.velocity = downNormal * mag;
