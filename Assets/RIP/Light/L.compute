@@ -1,0 +1,54 @@
+﻿
+#pragma kernel CSMain
+
+RWTexture2D<float> rt;
+Texture2D<float> c;
+
+float2 lightPos;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	//rt[id.xy] = 0;
+
+	float2 del = lightPos - float2(id.xy);
+
+	float yr;
+	bool yer = false;
+	if (abs(del.x) < abs(del.y))
+	{
+		yr = abs(del.x) / abs(del.y);
+		yer = true;
+	}
+	else
+		yr = abs(del.y) / abs(del.x);
+
+	float2 st = float2(1, yr);
+
+	float2 signer = st * sign(del);
+	int2 doer = int2(round(signer.x), round(signer.y));
+
+	if (yer)
+		doer = doer.yx;
+
+	if ((yer && del.x >= 0 && del.y <= 0) || (yer && del.x < 0 && del.y > 0))
+	{
+		doer.x *= -1;
+		doer.y *= -1;
+	}
+
+	uint2 pixel = clamp(id.xy + doer, 0, 127);
+	//pixel = uint2(id.xy + round(normalize(del) * 4));
+
+	/*if (rt[pixel] > .5 && c[id.xy] > .5)
+		rt[id.xy] = 1;*/
+
+	rt[id.xy] = rt[pixel];
+
+	if (c[id.xy] < .5)
+		rt[id.xy] = 0;
+
+	if (id.x == uint(lightPos.x) && id.y == uint(lightPos.y))
+		rt[id.xy] = 1;
+
+}

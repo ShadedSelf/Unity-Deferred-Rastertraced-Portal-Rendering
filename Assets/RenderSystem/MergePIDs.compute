@@ -1,0 +1,24 @@
+﻿
+Texture2D<float4> pids;
+RWStructuredBuffer<float4> buff;
+
+int prevPID;
+int depth;
+int width;
+
+#define FLAT_ID (id.x + id.y * width)
+
+//.x = id
+//.y = depth
+
+#pragma kernel MergePIDs
+[numthreads(8, 8, 1)]
+void MergePIDs(uint3 id : SV_DispatchThreadID)
+{
+	int pid = round(pids.Load(int3(id.xy, 0), 0).x);
+
+	int4 bPids = round(buff[FLAT_ID]);
+
+	if (depth == 0 || (bPids.x == prevPID && bPids.y == depth - 1))
+		buff[FLAT_ID] = float4(pid, depth, 0, 1);
+}

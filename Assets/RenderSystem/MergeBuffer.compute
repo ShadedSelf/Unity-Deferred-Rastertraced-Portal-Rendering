@@ -1,0 +1,27 @@
+﻿Texture2D<float4> condition;
+
+RWStructuredBuffer<float4> src;
+RWStructuredBuffer<float4> dst;
+
+int mergeID;
+int width;
+
+#define FLAT_ID (id.x + id.y * width)
+
+#pragma kernel MergeBuffer
+[numthreads(8, 8, 1)]
+void MergeBuffer(uint3 id : SV_DispatchThreadID)
+{
+	int pid = round(condition.Load(int3(id.xy, 0), 0).x);
+
+	if (mergeID < 0)
+	{
+		if (pid != abs(mergeID))
+			dst[FLAT_ID] = src[FLAT_ID];
+	}
+	else
+	{
+		if (pid == mergeID)
+			dst[FLAT_ID] = src[FLAT_ID];
+	}
+}

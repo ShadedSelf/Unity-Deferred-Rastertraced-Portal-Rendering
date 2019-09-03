@@ -1,0 +1,34 @@
+﻿Texture2D<float4> condition;
+
+RWStructuredBuffer<float4> dst;
+
+int mergeID;
+int width;
+float4 color;
+
+#define FLAT_ID (id.x + id.y * width)
+
+#pragma kernel MergeColor
+[numthreads(8, 8, 1)]
+void MergeColor(uint3 id : SV_DispatchThreadID)
+{
+	int pid = round(condition.Load(int3(id.xy, 0), 0).x);
+
+	if (mergeID < 0)
+	{
+		if (pid != abs(mergeID))
+			dst[FLAT_ID] = color;
+	}
+	else
+	{
+		if (pid == mergeID)
+			dst[FLAT_ID] = color;
+	}
+}
+
+#pragma kernel ClearColor
+[numthreads(8, 8, 1)]
+void ClearColor(uint3 id : SV_DispatchThreadID)
+{
+	dst[FLAT_ID] = color;
+}

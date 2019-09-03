@@ -1,0 +1,20 @@
+﻿
+Texture2D<float4> src;
+RWStructuredBuffer<float4> dst;
+RWStructuredBuffer<float4> condition;
+
+int prevPID;
+int depth;
+int width;
+
+#define FLAT_ID (id.x + id.y * width)
+
+#pragma kernel MergeTexture
+[numthreads(8, 8, 1)]
+void MergeTexture(uint3 id : SV_DispatchThreadID)
+{
+	int4 bPids = round(condition[FLAT_ID]);
+
+	if (bPids.x == prevPID && bPids.y == max(depth - 1, 0))
+		dst[FLAT_ID] = src.Load(int3(id.xy, 0), 0);
+}

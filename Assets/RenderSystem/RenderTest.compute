@@ -1,0 +1,101 @@
+﻿#pragma kernel FindEdges
+
+RWTexture2D<float4> _Result;
+
+Texture2D<float4> _EdgeBuffer;
+Texture2D<float4> _PortalID;
+
+RWStructuredBuffer<float4> normals;
+RWStructuredBuffer<float4> pids;
+
+int width;
+
+#define FLAT_ID (id.x + id.y * width)
+
+int flatten(int2 id) { return (id.x + id.y * width); }
+
+[numthreads(8, 8, 1)]
+void FindEdges (uint3 id : SV_DispatchThreadID)
+{
+	float4 center	= normals[flatten(id.xy)];
+	float4 right	= normals[flatten(id.xy + int2(1, 0))];
+	float4 up		= normals[flatten(id.xy + int2(0, 1))];
+	float4 left		= normals[flatten(id.xy - int2(1, 0))];
+	float4 down		= normals[flatten(id.xy - int2(0, 1))];
+
+	float3 test0	= center.xyz - right.xyz;
+	float3 test1	= center.xyz - up.xyz;
+	float3 test2	= center.xyz - left.xyz;
+	float3 test3	= center.xyz - down.xyz;
+
+	float3 combo = max(max(max(test0, test1), test2), test3);
+	float l = length(combo);
+	// l = pow(l, 0.25);
+
+	_Result[id.xy] = float4(l.xxx * 0.05, 1);
+	// _Result[id.xy] = float4(combo * 0.5, 1);
+
+	// int4 iCenter	= round(pids[flatten(id.xy)]);
+	// int4 iRight		= round(pids[flatten(id.xy + int2(1, 0))]);
+	// int4 iUp		= round(pids[flatten(id.xy + int2(0, 1))]);
+	// int4 iLeft		= round(pids[flatten(id.xy - int2(1, 0))]);
+	// int4 iDown		= round(pids[flatten(id.xy - int2(0, 1))]);
+
+	// if(iCenter.y != iRight.y
+	// || iCenter.y != iUp.y
+	// || iCenter.y != iLeft.y
+	// || iCenter.y != iDown.y)
+	// _Result[id.xy] = float4(1, 0, 0, 1);
+
+	// _Result[id.xy] = normals[flatten(id.xy)] * 0.05;
+	// _Result[id.xy] = float4(_Result[id.xy].xyz, 1);
+
+	// _Result[id.xy] = pids[flatten(id.xy)] * 0.1;
+	// _Result[id.xy] = float4(_Result[id.xy].xyz, 1);
+
+	// _Result[id.xy] = float4(center.xyz, 1);
+
+	// float res =
+	// (  length(test0) > 0.05 
+	// || length(test1) > 0.05
+	// || length(test2) > 0.05
+	// || length(test3) > 0.05
+	// ) ? 1 : 0;
+
+	// _Result[id.xy] = float4(_PortalID.Load(int3(id.xy, 0), 0).xyz * 0.25, 1);
+}
+
+
+RWStructuredBuffer<uint> portalInfo;
+
+uint AtomicRead(uint index)
+{
+	uint res;
+	InterlockedMin(portalInfo[index], 0xFFFFFF, res);
+	return res;
+}
+
+#pragma kernel FindPortals
+[numthreads(8, 8, 1)]
+void FindPortals (uint3 id : SV_DispatchThreadID)
+{
+	uint pid = round(_PortalID.Load(int3(id.xy, 0), 0).x);
+
+	if (pid > 0)
+	{
+		uint count = AtomicRead(0);
+		for (uint i = 0; i < count; i++)
+			if (pid == AtomicRead(i + 1))
+				return;
+				
+		portalInfo[count + 1] = pid;
+		InterlockedMax(portalInfo[0], count + 1, count);
+	}
+}
+
+#pragma kernel ResetPortals
+[numthreads(1, 1, 1)]
+void ResetPortals (uint3 id : SV_DispatchThreadID)
+{
+	portalInfo[0] = 0;
+}
