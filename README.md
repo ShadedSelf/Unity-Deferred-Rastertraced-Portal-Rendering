@@ -1,1 +1,0 @@
-![ScreenShot](/pics/rip.png)
