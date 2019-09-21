@@ -5,7 +5,7 @@ using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-public class Node<T>// : IEnumerable
+public class Node<T>// : IEnumerable?
 {
 	public List<Node<T>> children = new List<Node<T>>();
 	public Node<T> parent;

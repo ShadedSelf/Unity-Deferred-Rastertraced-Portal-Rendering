@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class ComputeKernel
+public partial class ComputeKernel
 {
-	public ComputeShader shader	{ get; private set; }
-	public string name			{ get; private set; }
-	public int index			{ get; private set; }
+	public ComputeShader shader		{ get; private set; }
+	public string name				{ get; private set; }
+	public int index				{ get; private set; }
 
-	private Vector3Int _threads;
-	private Vector3Int _groupSizes;
+	public Vector3Int threads		{ get; private set; }
+	public Vector3Int groupSizes	{ get; private set; }
 
 	public ComputeKernel(string name, ComputeShader shader, Vector3Int threads)
 	{
-		this.shader	= shader;
-		this.name	= name;
-		this.index	= shader.FindKernel(name);
-		_threads	= threads;
+		this.shader		= shader;
+		this.name		= name;
+		this.index		= shader.FindKernel(name);
+		this.threads	= threads;
 		
 		shader.GetKernelThreadGroupSizes(index, out uint x, out uint y, out uint z);
-		_groupSizes = new Vector3Int((int)x, (int)y, (int)z);
+		this.groupSizes = new Vector3Int((int)x, (int)y, (int)z);
 	}
 
 	//-- Set: ------------
@@ -31,9 +31,9 @@ public class ComputeKernel
 	public void Dispacth()
 	{
 		shader.Dispatch(index, 
-			_threads.x / _groupSizes.x, 
-			_threads.y / _groupSizes.y, 
-			_threads.z / _groupSizes.z);
+			threads.x / groupSizes.x, 
+			threads.y / groupSizes.y, 
+			threads.z / groupSizes.z);
 	}
 
 	public void RecordDispatch(CommandBuffer cmdBuff, bool profile)
@@ -41,9 +41,9 @@ public class ComputeKernel
 		if (profile) { cmdBuff.BeginSample(name); }
 		
 		cmdBuff.DispatchCompute(shader, index, 
-			_threads.x / _groupSizes.x, 
-			_threads.y / _groupSizes.y, 
-			_threads.z / _groupSizes.z);
+			threads.x / groupSizes.x, 
+			threads.y / groupSizes.y, 
+			threads.z / groupSizes.z);
 			
 		if (profile) { cmdBuff.EndSample(name); }
 	}

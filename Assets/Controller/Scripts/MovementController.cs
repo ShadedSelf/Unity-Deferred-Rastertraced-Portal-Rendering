@@ -7,14 +7,12 @@ using static Unity.Mathematics.math;
 
 public class MovementController
 {
-	private Transform body, pivot;
-
 	//-- Settings: --------------------------------------------
-	public float movementSpeed;
-    public float jumpForce;
-    public float downForce;
-	public int maxJumps;
-	public LayerMask mask;
+	public float movementSpeed	{ get; set; }
+    public float jumpForce		{ get; set; }
+    public float downForce		{ get; set; }
+	public int maxJumps			{ get; set; }
+	public LayerMask mask		{ get; set; }
 
 	//-- Global State: ----------------------------------------
 	public Vector3 down	= Vector3.down;
@@ -27,6 +25,15 @@ public class MovementController
 	//-- Internal State: --------------------------------------
 	private float mag = 0;
     private int jumpsLeft;
+	
+	private Transform body, pivot;
+
+	public Vector3 rawDirection => new Vector3
+	(
+		Input.GetKey(KeyCode.D).ToInt() - Input.GetKey(KeyCode.A).ToInt(), 
+		0,
+		Input.GetKey(KeyCode.W).ToInt() - Input.GetKey(KeyCode.S).ToInt()
+	).normalized;
 
 	public MovementController(Transform body, Transform pivot)
 	{
@@ -42,12 +49,6 @@ public class MovementController
 
 	public void Test(float deltaTime)
 	{
-		Vector3 rawDirection = new Vector3
-		(
-			Input.GetKey(KeyCode.D).ToInt() - Input.GetKey(KeyCode.A).ToInt(), 
-			0,
-			Input.GetKey(KeyCode.W).ToInt() - Input.GetKey(KeyCode.S).ToInt()
-		).normalized;
 		Vector3 dir = TransformDirection(rawDirection);
 
 		var rb = body.GetComponent<Rigidbody>();
@@ -68,10 +69,10 @@ public class MovementController
 		mag += downForce * deltaTime * ((Input.GetKey(KeyCode.Space) && mag < 0) ? 1 : 2);
 
 		var coll = body.GetComponent<CapsuleCollider>();
-		Vector3 from = body.TransformPoint(coll.center + new Vector3(0, coll.height * 0.5f - coll.radius, 0));
-		if (Physics.SphereCast(from, coll.radius, down, out var hit, 10f, mask)) //cast small box to get propper normal
+		Vector3 from = body.TransformPoint(coll.center + new Vector3(0, (coll.height * 0.5f - coll.radius) * scale, 0));
+		if (Physics.SphereCast(from, coll.radius * scale, down, out var hit, 10f, mask)) //cast small box to get propper normal
 		{
-			if (hit.distance < 1.01f)
+			if (hit.distance < 1.01f * scale)
 			{
 				if (Physics.BoxCast(body.position, Vector3.one * 0.25f * scale, down, out var nHit, body.rotation, scale, mask) && hit.collider.CompareTag("Wakker")) //cast to hit.pint
 					down = -nHit.normal;

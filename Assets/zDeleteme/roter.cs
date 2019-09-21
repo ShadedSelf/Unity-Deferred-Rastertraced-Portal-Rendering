@@ -14,4 +14,11 @@ public class roter : MonoBehaviour
 		float t = 20;
 		transform.rotation = Quaternion.AngleAxis(Time.time * t * 2, Vector3.right);
 	}
+
+	// void FixedUpdate()
+	// {
+	// 	// float t = Portal.time;
+	// 	float t = 20 * Time.fixedTime;
+	// 	transform.localRotation = Quaternion.AngleAxis(Time.fixedTime * t * 2, Vector3.right);
+	// }
 }

@@ -5,6 +5,22 @@ using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
+public class TransformData
+{
+	public Vector3 position		{ get; set; } = Vector3.zero;
+	public Quaternion rotation	{ get; set; } = Quaternion.identity;
+	public Vector3 scale		{ get; set; } = Vector3.one;
+
+	public TransformData() { }
+	public TransformData(Transform transform) : this(transform.position, transform.rotation, transform.lossyScale) { }
+	public TransformData(Vector3 position, Quaternion rotation, Vector3 scale)
+	{
+		this.position	= position;
+		this.rotation	= rotation;
+		this.scale		= scale;
+	}
+}
+
 public class Controller : MonoBehaviour, IPortableObject
 {
 	[Header("Mouse Settings")]
@@ -24,6 +40,7 @@ public class Controller : MonoBehaviour, IPortableObject
 	public float rotSpeed = 0.15f;
 
 	//-- Globals: ----------------------
+	public static Camera currentCamera;
 	// public static Controller current;
 	// public Matrix4x4 matrix = Matrix4x4.identity;
 
@@ -35,6 +52,7 @@ public class Controller : MonoBehaviour, IPortableObject
 	private RenderSystemTest renderTest;
 
     private Transform pivotTrs, camTrs;
+	private Camera cam;
 
 	//-- IPortable: -------------------------------------------
  	public Rigidbody rb		=> GetComponent<Rigidbody>();
@@ -44,23 +62,26 @@ public class Controller : MonoBehaviour, IPortableObject
 
     void OnEnable()
     {
-		pivotTrs	= transform.GetChild(0).transform;
-		camTrs		= GetComponentInChildren<Camera>().transform;
+		cam					= GetComponentInChildren<Camera>();
+		pivotTrs			= transform.GetChild(0).transform;
+		camTrs				= cam.transform;
+		cam.nearClipPlane	= 0.00001f;
+		currentCamera		= cam;
 
 		camCntrl	= new CameraController(pivotTrs, camTrs);
 		mover		= new MovementController(transform, pivotTrs);
 		rotator		= new RotatorController(transform);
 		
-		renderTest	= new RenderSystemTest(camTrs.GetComponent<Camera>());
+		renderTest	= new RenderSystemTest();
 
 		UpdateSettings();
 
-		GetComponentInChildren<Camera>().nearClipPlane = 0.0001f;
 		// Physics.autoSimulation = false;
 		// Physics.autoSyncTransforms = false;
 		Time.fixedDeltaTime = 0.01f;
 
 		rb.solverIterations = 32;
+		// scale = 0.1f;
 	}
 
 	public void UpdateSettings()
@@ -82,6 +103,7 @@ public class Controller : MonoBehaviour, IPortableObject
 		camCntrl.Lock();
 		camCntrl.Rotate(Time.deltaTime);
 
+		// if (needsToRotate) {
 		var rot = camTrs.rotation;
 		rotator.RotateBody(down, Time.deltaTime); //Lock rotation till reaches new normal
 		var rel = Quaternion.Inverse(rot) * camTrs.rotation; //Relative
@@ -101,28 +123,21 @@ public class Controller : MonoBehaviour, IPortableObject
 	{
 		// Portal.time = 0f;
 
-		Vector3 p = camTrs.position;
-		Quaternion r = camTrs.rotation;
 		Matrix4x4 tester = Matrix4x4.Scale(new Vector3(1f / scale, 1f / scale, 1f / scale));
 
 		renderTest.ClearBuffers();
-		Shader.SetGlobalMatrix("portalTransform", tester);
+		renderTest.SetInitialTransform(camTrs);
 
-		var map = PortalRay.GetPortalMap(camTrs.GetComponent<Camera>());
-		using (var dummyTrs = new TemporaryTransform(camTrs.position, camTrs.rotation, new Vector3(scale, scale, scale))) //Scale for oblique plane offset?
-			renderTest.RenderPortalMap(dummyTrs.transform, map, 0, tester, 0); //Portal rendering might overlap
-		PortalRay.ClearAndReleaseRecursive(map);
+		// var map = PortalRay.GetPortalMap(cam);
+		// renderTest.RenderPortalMap(map, new TransformData(camTrs), tester, 0, 0); //Allocations
+		// PortalRay.ClearAndReleaseRecursiveDown(map);
 
-		// using (var dummyTrs = new TemporaryTransform(camTrs.position, camTrs.rotation, new Vector3(scale, scale, scale))) //Scale for oblique plane offset?
-		// 	renderTest.LazyRender(dummyTrs.transform, 0, tester, 0); //Portal rendering might overlap
+		renderTest.LazyRender(new TransformData(camTrs), tester, 0, 0);
 
 		renderTest.Edge();
 
-		camTrs.SetPositionAndRotation(p, r);
-		camTrs.GetComponent<Camera>().ResetProjectionMatrix();
-
 		// dynamic why = 0;
-		// why.HelpMeNotToCrash();
+		// why.HelpMeNotToCrash(); //int extension
 	}
 
 	void OnGUI()
@@ -131,12 +146,12 @@ public class Controller : MonoBehaviour, IPortableObject
             Graphics.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), renderTest.render);
     }
 
-	void OnDrawGizmos()
+	void OnDisable()
 	{
-
+		renderTest.Cleanup();
 	}
 
-	void OnDisable()
+	void OnDrawGizmos()
 	{
 
 	}

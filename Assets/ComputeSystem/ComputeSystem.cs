@@ -5,50 +5,46 @@ using UnityEngine.Rendering;
 
 public class ComputeSystem
 {
-	private Dictionary<string, ComputeKernel> _kernels	= new Dictionary<string, ComputeKernel>();
-	private ComputeData _data = new ComputeData();
-	private ComputeShader _shader;
-	private bool _profile;
+	public ComputeData data		{ get; private set; }  = new ComputeData();
+	public ComputeShader shader	{ get; private set; }
 
-	public ComputeShader shader	=> _shader;
-	public ComputeData data	=> _data;
+	private Dictionary<string, ComputeKernel> kernels	= new Dictionary<string, ComputeKernel>();
+	private bool profile;
 
 	public ComputeSystem(ComputeShader shader, bool profile = false)
 	{
-		_shader		= shader;
-		_profile	= profile;
+		this.shader		= shader;
+		this.profile	= profile;
 	}
 
 	//-- Add: -----------------------------------------------------------------------------------------------------------------------
-	public void AddKernel(string name, Vector3Int threads) => _kernels.Add(name, new ComputeKernel(name, _shader, threads));
+	public void AddKernel(string name, Vector3Int threads) => kernels.Add(name, new ComputeKernel(name, shader, threads));
 
 	//-- Set: -----------------------------------------------------------------------------------------------------------------------
-	public void BindComputeData() => BindComputeData(_data);
+	public void BindComputeData() => BindComputeData(data);
 	public void BindComputeData(ComputeData data)
 	{
-		foreach (var kernel in _kernels.Values)
+		foreach (var kernel in kernels.Values)
 		{
 			foreach (var buffer in data.buffers)	{ kernel.SetBuffer(buffer.Key, buffer.Value);		}
 			foreach (var texture in data.textures)	{ kernel.SetTexture(texture.Key, texture.Value);	}
 		}
 	}
 
-	public void SetBuffer(string kernel, string bufferName)								=> _kernels[kernel].SetBuffer(bufferName, _data.buffers[bufferName]);
-	public void SetBuffer(string kernel, string bufferName, ComputeBuffer buffer)		=> _kernels[kernel].SetBuffer(bufferName, buffer);
-	// SetBufferRange
+	public void SetBuffer(string kernel, string bufferName)								=> kernels[kernel].SetBuffer(bufferName, data.buffers[bufferName]);
+	public void SetBuffer(string kernel, string bufferName, ComputeBuffer buffer)		=> kernels[kernel].SetBuffer(bufferName, buffer);
 
-	public void SetRenderTexture(string kernel, string textureName)						=> _kernels[kernel].SetTexture(textureName, _data.textures[textureName]);
-	public void SetRenderTexture(string kernel, string textureName, RenderTexture rt)	=> _kernels[kernel].SetTexture(textureName, rt);
-	// SetRenderTextureRange
+	public void SetRenderTexture(string kernel, string textureName)						=> kernels[kernel].SetTexture(textureName, data.textures[textureName]);
+	public void SetRenderTexture(string kernel, string textureName, RenderTexture rt)	=> kernels[kernel].SetTexture(textureName, rt);
 
 	//-- Dispatch: ------------------------------------------------------------------------------------------------------------------
-	public void Dispatch(string kernel)								=> _kernels[kernel].Dispacth();
-	public void RecordDispatch(string kernel, CommandBuffer cmdBuf) => _kernels[kernel].RecordDispatch(cmdBuf, _profile);
+	public void Dispatch(string kernel)								=> kernels[kernel].Dispacth();
+	public void RecordDispatch(string kernel, CommandBuffer cmdBuf) => kernels[kernel].RecordDispatch(cmdBuf, profile);
 
 	//-- Clean: ---------------------------------------------------------------------------------------------------------------------
 	public void Cleanup()
 	{
-		_data.Cleanup();
-		_kernels.Clear();
+		data.Cleanup();
+		kernels.Clear();
 	}
 }

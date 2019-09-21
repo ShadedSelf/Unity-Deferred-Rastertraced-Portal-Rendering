@@ -7,34 +7,37 @@ using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
 /*-- TODO: --
-Remove the 180 y offset
+Remove the 180 y offset?
 -----------*/
 
-public class Portal : IDisposable//, IEquatable<Portal>
+public class Portal : IDisposable
 {
+	//-- Globals: -----------
 	public static List<Portal> portals = new List<Portal>();
 	public static readonly int maxRecursions = 4;
 
+	//-- Properties: --------
 	public Portal other			{ get; set; }
-	public Transform transform	{ get; private set; }
 	public int id				{ get; private set; }
+	
+	public Transform transform	{ get; private set; }
+	public Renderer renderer	{ get; private set; } 
+	public Collider collider	{ get; private set; }
 
-	public Renderer renderer => transform.GetComponent<Renderer>();
-	public Collider collider => transform.GetComponent<Collider>();
-
-	public Portal(Transform transform, MeshRenderer meshRenderer)
+	public Portal(GameObject go)
 	{
 		portals.Add(this);
-		id = portals.Count;
-		this.transform = transform;
+		id = this.GetHashCode();
 
-		meshRenderer.sharedMaterial = new Material(Shader.Find("UV/UV Remap"));
-		meshRenderer.sharedMaterial.SetFloat("_ID", id);
+		transform	= go.GetComponent<Transform>();
+		renderer	= go.GetComponent<Renderer>();
+		collider	= go.GetComponent<Collider>();
+
+		var mat = go.GetComponent<MeshRenderer>().material;
+		mat.SetFloat("_ID", id);
 	}
 
-	// public void OnBecomeVisible
-
-	public void Send(IPortableObject viewer, Vector3 offset) // Utils: Get transfor, roation, scale, offset multipliers
+	public void Send(IPortableObject viewer, Vector3 offset) // Todo, Utils: Get transform, rotation, scale, offset multipliers
 	{
 		viewer.transform.position	= this.TransformPosition(viewer.transform.position, offset);
 		viewer.transform.rotation	= this.TransformRotation(viewer.transform.rotation);
@@ -51,7 +54,8 @@ public class Portal : IDisposable//, IEquatable<Portal>
 		Graphics.DrawMesh(viewer.mesh, pos, rot, viewer.mat, 0);
 	}
 
+	// public void OnBecomeVisible() { }
+
 	//-- Interfaces: --
-	public void Dispose()				=> portals.Remove(this);
-	// public bool Equals(Portal other)	=> other.id == id;
+	public void Dispose() => portals.Remove(this);
 }

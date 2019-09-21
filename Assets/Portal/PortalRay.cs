@@ -29,11 +29,6 @@ public class Pool<T> where T : new()
 			return ob;
 		return new T();
 	}
-
-	// public void Flood(int n)
-	// {
-		
-	// }
 }
 
 public static class PortalRay
@@ -41,6 +36,13 @@ public static class PortalRay
 	private static Pool<Node<Portal>> pool = new Pool<Node<Portal>>();
 
 	//-- Pool Management: ---------
+	private static Node<Portal> GetPooledNode(Portal data)
+	{
+		var node = pool.Get();
+		node.data = data;
+		return node;
+	}
+
 	private static void ClearAndRelease(Node<Portal> node)
 	{
 		node.children.Clear();
@@ -48,21 +50,23 @@ public static class PortalRay
 		pool.Release(node);
 	}
 
-	public static void ClearAndReleaseRecursive(Node<Portal> root)
+	public static void ClearAndReleaseRecursiveDown(Node<Portal> root)
 	{
 		if (root == null)
 			return;
 
 		foreach (var node in root.children)
-			ClearAndReleaseRecursive(node);
+			ClearAndReleaseRecursiveDown(node);
 		ClearAndRelease(root);
 	}
 
-	private static Node<Portal> GetPooledNode(Portal data)
+	public static void ClearAndReleaseRecursiveUp(Node<Portal> leaf) //Linear
 	{
-		var node = pool.Get();
-		node.data = data;
-		return node;
+		var parent = leaf.parent;
+		ClearAndRelease(leaf);
+		if (parent != null)
+			foreach (var node in parent.children)
+				ClearAndReleaseRecursiveUp(node);
 	}
 
 	//-- Raycast: ----------------
@@ -85,7 +89,7 @@ public static class PortalRay
 	{
 		if (recursions > 0 && Physics.Raycast(ray, out var hit) && hit.collider.CompareTag("Portal"))
 		{
-			var portal = hit.collider.GetComponent<PortalManager>().port;
+			var portal = hit.collider.GetComponent<PortalManager>().portal;
 			parent.Insert(GetPooledNode(portal));
 
 			Vector3 vPos = portal.TransformPosition(hit.point);
@@ -112,12 +116,15 @@ public static class PortalRay
 	{
 		if (!HasPortalInChildren(treeNode, rayNode, out var n))
 		{
-			if (rayNode.parent != null)
-				ClearAndRelease(rayNode.parent);
+			// if (rayNode.parent != null)
+				// ClearAndReleaseRecursiveUp(rayNode.parent);
+				// ClearAndRelease(rayNode.parent);
 			treeNode.Insert(rayNode);
 		}
 		else if (rayNode.children.Count > 0)
 			MergeRayPath(n, rayNode.children[0]);
+		else
+			ClearAndReleaseRecursiveDown(rayNode.root);
 	}
 
 	public static Node<Portal> GetPortalMap(Camera cam) // Allocations...
@@ -130,6 +137,10 @@ public static class PortalRay
 			{
 				Vector3 uv = new Vector3((float)i / (float)(res - 1), (float)j / (float)(res - 1), 0);
 				Ray ray = cam.ViewportPointToRay(uv);
+
+				// Vector3 wPos = cam.ViewportToWorldPoint(uv);
+				// Vector3 wPos = cam.TrueViewportToWorldPoint(uv);
+				// Ray ray = new Ray(cam.transform.position, (wPos - cam.transform.position).normalized);
 					
 				if (PortalRay.CastPortalRay(ray, out var rayPath))
 					MergeRayPath(map, rayPath);

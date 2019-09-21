@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class RotatorController
 {
-	public float rotSpeed;
+	//-- Settings: ------------
+	public float rotSpeed { get; set; }
+
+	//-- Global State: --------
+	// public bool isRotatig => vel.magnitude > 0.1f;
 
 	private Transform body;
 	private Vector3 vel;
-
-	// public Vector3 rotatedUp { get; private set; }
 
 	public RotatorController(Transform body)
 	{

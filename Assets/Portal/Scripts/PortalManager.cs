@@ -5,34 +5,41 @@ using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
+[RequireComponent(typeof(MeshRenderer))]
+[RequireComponent(typeof(BoxCollider))]
 public class PortalManager : MonoBehaviour
 {
-	public GameObject otherPort;
-	public Portal port;
+	public GameObject connectedPortal;
+	public Portal portal;
 
 	void OnEnable()
 	{
-		port = new Portal(transform, GetComponent<MeshRenderer>());
+		portal = new Portal(gameObject);
 
-		GetComponent<MeshCollider>().convex		= true;
-		GetComponent<MeshCollider>().isTrigger	= true;
-	}
+		// GetComponent<BoxCollider>().convex		= true;
+		GetComponent<BoxCollider>().isTrigger	= true;
 
-	void Update() //AAA	
-	{
-		port.other = otherPort.GetComponent<PortalManager>().port;
+		var other = connectedPortal.GetComponent<PortalManager>().portal;
+		if (other != null)
+		{
+			portal.other = other;
+			other.other = portal;
+		}
 	}
 
 	void OnTriggerStay(Collider thing) // Find better way, also modify how camera can get to the actual plane
 	{
 		IPortableObject ob = thing.GetComponent<IPortableObject>();
 
-		if (ob != null && transform.InverseTransformPoint(ob.center).z >= -0.1f)
+		float d = ob.scale / transform.lossyScale.x;
+
+		// if (ob != null && transform.InverseTransformPoint(ob.center).z >= -0.1f)
+		if (ob != null && transform.InverseTransformPoint(ob.center).z >= -0.5f * d)
 		{
 			Vector3 localPos = transform.InverseTransformPoint(ob.transform.position);
 			ob.transform.position = transform.TransformPoint(new Vector3(localPos.x, localPos.y, 0)); //Hmm
 
-			port.Send(ob, new Vector3(0, 0, 0.11f));
+			portal.Send(ob, new Vector3(0, 0, 0.51f * d));
 		}
 
 		// if (ob is IPortableMesh)
@@ -43,7 +50,7 @@ public class PortalManager : MonoBehaviour
 
 	void OnDisable()
 	{
-		port.Dispose();
+		portal.Dispose();
 	}
 
 	// void OnDrawGizmos()
