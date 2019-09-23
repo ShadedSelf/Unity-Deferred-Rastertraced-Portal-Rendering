@@ -41,13 +41,11 @@ public class RenderSystemTest
 	private ComputeSystem computeSystem;
 	private Dictionary<DefferredBufferID, ComputeBuffer> deferredBuffers = new Dictionary<DefferredBufferID, ComputeBuffer>();
 
-	public static ComputeKernel mergeTexture, mergeBuffer, mergeColor, clearColor, mergePIDs;
+	public static ComputeKernel mergeTexture, clearColor, mergePIDs;
 
 	static RenderSystemTest()
 	{
 		mergeTexture = ComputeKernel.GetKernelInstance("MergeTexture", "MergeTexture", new Vector3Int(Screen.width, Screen.height, 1));
-		mergeBuffer = ComputeKernel.GetKernelInstance("MergeBuffer", "MergeBuffer", new Vector3Int(Screen.width, Screen.height, 1));
-		mergeColor = ComputeKernel.GetKernelInstance("MergeColor", "MergeColor", new Vector3Int(Screen.width, Screen.height, 1));
 		clearColor = ComputeKernel.GetKernelInstance("MergeColor", "ClearColor", new Vector3Int(Screen.width, Screen.height, 1));
 		mergePIDs = ComputeKernel.GetKernelInstance("MergePIDs", "MergePIDs", new Vector3Int(Screen.width, Screen.height, 1));
 	}
@@ -92,16 +90,6 @@ public class RenderSystemTest
 
 
 	//-- Kernels: -- [
-	// public static void MergeBuffer(ComputeBuffer src, ComputeBuffer dst, Texture condition, int id)
-	// {
-	// 	mergeBuffer.SetBuffer("src", src);				//Check setting cost
-	// 	mergeBuffer.SetBuffer("dst", dst);				//Same
-	// 	mergeBuffer.SetTexture("condition", condition); //Etc...
-	// 	mergeBuffer.shader.SetInt("mergeID", id);
-	// 	mergeBuffer.shader.SetInt("width", Screen.width);
-	// 	mergeBuffer.Dispacth();
-	// }
-
 	public static void MergeTexture(Texture src, ComputeBuffer dst, ComputeBuffer condition, int prevPID, int depth)
 	{
 		mergeTexture.SetTexture("src", src);
@@ -250,13 +238,6 @@ public static class PortalSomething
 	// 	return new Vector3(v.x, v.y, v.z);
 	// }
 
-// 	//-- CPU Acurate, ish: --
-// 	private static void GetCpuAccurateList(Camera cam, List<Portal> list)
-// 	{
-// 		foreach (var portal in Portal.portals)
-// 			if (portal.IsVisibleFromCam(cam))
-// 				list.Add(portal);
-// 	}
 
 // 	// const int density = 5;
 // 	//Make rays go through

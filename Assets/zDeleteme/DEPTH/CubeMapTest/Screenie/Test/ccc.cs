@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Unity.Mathematics;
+using static Unity.Mathematics.math;
+
 public class ccc : MonoBehaviour
 {
 
@@ -53,24 +56,24 @@ public class ccc : MonoBehaviour
 
 		float yr;
 		bool yer = false;
-		if (Mathf.Abs(del.x) < Mathf.Abs(del.y))
+		if (abs(del.x) < abs(del.y))
 		{
-			yr = Mathf.Abs(del.x) / Mathf.Abs(del.y);
+			yr = abs(del.x) / abs(del.y);
 			yer = true;
 		}
 		else
-			yr = Mathf.Abs(del.y) / Mathf.Abs(del.x);
+			yr = abs(del.y) / abs(del.x);
 
 
-		float zr = Mathf.Abs(del.z) / Mathf.Abs(del.x);
+		float zr = abs(del.z) / abs(del.x);
 
-		float max = Mathf.Max(Mathf.Abs(del.x), Mathf.Abs(del.y));
-		max = Mathf.Abs(del.x);
+		float max = Mathf.Max(abs(del.x), abs(del.y));
+		max = abs(del.x);
 
 		Vector3 st = Vector3.zero;
 		for (int r = 0; r < iter; r++)
 		{
-			Vector3 signer = st.MultVector(del.SignVector());
+			Vector3 signer = st * sign(del);// st.MultVector(del.SignVector());
 			Vector3 doer = new Vector3(Mathf.Round(signer.x), Mathf.Round(signer.y), 0);
 
 			if (yer)
@@ -95,10 +98,10 @@ public class ccc : MonoBehaviour
 
 			Gizmos.color = Color.green;
 			if (yer) Gizmos.color = Color.blue;
-			Gizmos.DrawWireCube((origin.position + doer).MultVector(new Vector3(1, 1, 0)), Vector3.one);
+			Gizmos.DrawWireCube((origin.position + doer) * float3(1, 1, 0), Vector3.one);
 
 			Gizmos.color = Color.magenta;
-			Gizmos.DrawLine((origin.position + doer).MultVector(new Vector3(1, 1, 0)), origin.position + zoer);
+			Gizmos.DrawLine((origin.position + doer) * float3(1, 1, 0), origin.position + zoer);
 
 			st.x += 1;
 			st.y += yr;

@@ -11,26 +11,6 @@ using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-
-public class Pool<T> where T : new()
-{
-	private ConcurrentBag<T> obs = new ConcurrentBag<T>();
-
-	public int count => obs.Count;
-
-	public void Release(T ob)
-	{
-		obs.Add(ob);
-	}
-
-	public T Get()
-	{
-		if (obs.TryTake(out var ob))
-			return ob;
-		return new T();
-	}
-}
-
 public static class PortalRay
 {
 	private static Pool<Node<Portal>> pool = new Pool<Node<Portal>>();
@@ -135,7 +115,7 @@ public static class PortalRay
 		for	(int i = 0; i < res; i++)
 		{	for	(int j = 0; j < res; j++)
 			{
-				Vector3 uv = new Vector3((float)i / (float)(res - 1), (float)j / (float)(res - 1), 0);
+				Vector3 uv = float3(float2(i, j) / (res - 1), 0);
 				Ray ray = cam.ViewportPointToRay(uv);
 
 				// Vector3 wPos = cam.ViewportToWorldPoint(uv);

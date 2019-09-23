@@ -8,7 +8,7 @@ public class ComputeSystem
 	public ComputeData data		{ get; private set; }  = new ComputeData();
 	public ComputeShader shader	{ get; private set; }
 
-	private Dictionary<string, ComputeKernel> kernels	= new Dictionary<string, ComputeKernel>();
+	private Dictionary<string, ComputeKernel> kernels = new Dictionary<string, ComputeKernel>();
 	private bool profile;
 
 	public ComputeSystem(ComputeShader shader, bool profile = false)

@@ -16,8 +16,7 @@ public class PortalManager : MonoBehaviour
 	{
 		portal = new Portal(gameObject);
 
-		// GetComponent<BoxCollider>().convex		= true;
-		GetComponent<BoxCollider>().isTrigger	= true;
+		GetComponent<BoxCollider>().isTrigger = true;
 
 		var other = connectedPortal.GetComponent<PortalManager>().portal;
 		if (other != null)
@@ -33,7 +32,6 @@ public class PortalManager : MonoBehaviour
 
 		float d = ob.scale / transform.lossyScale.x;
 
-		// if (ob != null && transform.InverseTransformPoint(ob.center).z >= -0.1f)
 		if (ob != null && transform.InverseTransformPoint(ob.center).z >= -0.5f * d)
 		{
 			Vector3 localPos = transform.InverseTransformPoint(ob.transform.position);
@@ -41,11 +39,6 @@ public class PortalManager : MonoBehaviour
 
 			portal.Send(ob, new Vector3(0, 0, 0.51f * d));
 		}
-
-		// if (ob is IPortableMesh)
-		// {
-		// 	port.DrawMesh(ob as IPortableMesh);
-		// }
 	}
 
 	void OnDisable()

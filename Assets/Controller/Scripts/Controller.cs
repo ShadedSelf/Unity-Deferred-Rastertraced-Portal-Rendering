@@ -108,9 +108,6 @@ public class Controller : MonoBehaviour, IPortableObject
 		rotator.RotateBody(down, Time.deltaTime); //Lock rotation till reaches new normal
 		var rel = Quaternion.Inverse(rot) * camTrs.rotation; //Relative
 		camCntrl.Correct(rel);
-
-		// Physics.SyncTransforms();
-		// Physics.Simulate(min(Time.deltaTime, 0.03f));
     }
 
 	void FixedUpdate()
@@ -121,18 +118,17 @@ public class Controller : MonoBehaviour, IPortableObject
 
 	void LateUpdate()
 	{
-		// Portal.time = 0f;
-
-		Matrix4x4 tester = Matrix4x4.Scale(new Vector3(1f / scale, 1f / scale, 1f / scale));
 
 		renderTest.ClearBuffers();
 		renderTest.SetInitialTransform(camTrs);
 
+		var matrix = Matrix4x4.Scale(float3(1f / scale));
+
 		// var map = PortalRay.GetPortalMap(cam);
-		// renderTest.RenderPortalMap(map, new TransformData(camTrs), tester, 0, 0); //Allocations
+		// renderTest.RenderPortalMap(map, new TransformData(camTrs), matrix, 0, 0); //Allocations
 		// PortalRay.ClearAndReleaseRecursiveDown(map);
 
-		renderTest.LazyRender(new TransformData(camTrs), tester, 0, 0);
+		renderTest.LazyRender(new TransformData(camTrs), matrix, 0, 0);
 
 		renderTest.Edge();
 

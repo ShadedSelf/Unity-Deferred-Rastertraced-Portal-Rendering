@@ -45,7 +45,7 @@ void FindEdges (uint3 id : SV_DispatchThreadID)
 	// || iCenter.y != iDown.y)
 	// _Result[id.xy] = float4(1, 0, 0, 1);
 
-	// _Result[id.xy] = (normals[flatten(id.xy)] + position[flatten(id.xy)]) * 0.05;
+	// _Result[id.xy] = (normals[flatten(id.xy)]);
 	// _Result[id.xy] = float4(_Result[id.xy].xyz, 1);
 
 	// _Result[id.xy] = pids[flatten(id.xy)] * 0.1;
