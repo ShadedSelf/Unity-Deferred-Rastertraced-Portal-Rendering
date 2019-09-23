@@ -1,0 +1,99 @@
+﻿#pragma kernel Do
+#pragma kernel Act
+
+struct H
+{
+	float4 posh;
+	float4 col;
+};
+
+RWTexture2D<float> u;
+RWTexture2D<float> v;
+RWTexture2D<float4> dir;
+
+Texture2D<float> ground;
+Texture2D<float> stiff;
+
+RWStructuredBuffer<H> buff;
+RWStructuredBuffer<float> test;
+
+float3 pos;
+float3 position;
+float2 scale;
+int2 num;
+int difRa;
+float damp;
+float radius;
+float grav;
+float waterLVL;
+float lvlT;
+float dT;
+float wall;
+
+uint3 idt;
+
+uint2 Clamper(int2 number)
+{
+	uint2 temp = uint2(clamp(number, 0, num - 1));
+	return temp;
+	return (ground[temp] < .5) ? temp : idt.xy;
+}
+
+[numthreads(8, 8, 1)]
+void Do(uint3 id : SV_DispatchThreadID)
+{
+	idt = id;
+
+	float tt = 0;
+	// float sed = (float)difRa / 2;
+	// float div = 0;
+	// for (int x = -difRa / 2; x < difRa / 2 + 1; x++)
+	// {
+	// 	for (int y = -difRa / 2; y < difRa / 2 + 1; y++)
+	// 	{
+	// 		float dist = distance(float2(id.xy), Clamper(id.xy + int2(x, y)));
+
+	// 		if (dist < sed && dist > .1f)
+	// 		{
+	// 			float t = 1 - dist / sed;
+	// 			div += t;
+	// 			tt += u[Clamper(id.xy + int2(x, y))] * t;
+	// 		}
+	// 	}
+	// }
+	tt += u[Clamper(id.xy + int2(1, 0))];
+	tt += u[Clamper(id.xy - int2(1, 0))];
+	tt += u[Clamper(id.xy + int2(0, 1))];
+	tt += u[Clamper(id.xy - int2(0, 1))];
+
+
+	// tt = tt / div - u[id.xy];
+	tt = tt - 4*u[id.xy];
+	v[id.xy] += tt * dT;
+	v[id.xy] *= /*stiff[id.xy] **/ damp;
+	u[id.xy] += v[id.xy] * dT;
+
+	u[id.xy] += (waterLVL - u[id.xy]) / lvlT * dT;
+
+	if (distance((pos / float3(scale.x, scale.y, scale.x) - position), float3(id.x, 0, id.y)) < radius)
+		u[id.xy] += (grav - u[id.xy]) * dT;
+		// u[id.xy] = lerp(u[id.xy], grav, .2);
+
+	// if (ground[id.xy] > .5)
+	// {
+	// 	u[id.xy] = wall;
+	// 	buff[num.y * id.x + id.y].col.w = 1;
+	// }
+
+	buff[num.y * id.x + id.y].posh.xyz = float3(id.x, 0, id.y);
+	buff[num.y * id.x + id.y].posh.w = u[id.xy];
+
+	if (id.x + id.y == 0)
+		test[0] = u[id.xy];
+}
+
+[numthreads(1, 1, 1)]
+void Act(uint3 id : SV_DispatchThreadID)
+{
+
+}

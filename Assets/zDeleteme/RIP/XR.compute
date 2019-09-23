@@ -1,0 +1,44 @@
+﻿
+#pragma kernel CSMain
+
+struct H
+{
+	float4 posh;
+	float4 col;
+};
+
+RWTexture2D<float> u;
+RWTexture2D<float> v;
+RWStructuredBuffer<H> buff;
+
+float3 pos;
+int num;
+float damp;
+float radius;
+float grav;
+float waterLVL;
+float lvlT;
+float dT;
+
+[numthreads(16, 16, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	float t = 0;
+	t += u[uint2(clamp((int)id.x + 1, 0, num - 1), id.y)];
+	t += u[uint2(clamp((int)id.x - 1, 0, num - 1), id.y)];
+	t += u[uint2(id.x, clamp((int)id.y - 1, 0, num - 1))];
+	t += u[uint2(id.x, clamp((int)id.y + 1, 0, num - 1))];
+
+
+	t = t / 4 - u[id.xy];
+	v[id.xy] += t * dT;
+	v[id.xy] *= damp;
+	u[id.xy] += v[id.xy];
+
+	u[id.xy] += (waterLVL - u[id.xy]) / lvlT * dT;
+
+	if (distance(pos, float3(id.x, 0, id.y)) < radius)
+		u[id.xy] = lerp(u[id.xy], grav, .2);
+
+	buff[num * id.x + id.y].posh.w = u[id.xy];
+}
