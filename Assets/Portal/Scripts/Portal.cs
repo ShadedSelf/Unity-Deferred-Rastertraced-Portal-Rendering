@@ -14,7 +14,7 @@ public class Portal : IDisposable
 {
 	//-- Globals: -----------
 	public static List<Portal> portals = new List<Portal>();
-	public static readonly int maxRecursions = 4;
+	public static int maxRecursions = 4;
 
 	//-- Properties: --------
 	public Portal other			{ get; set; }
@@ -27,7 +27,7 @@ public class Portal : IDisposable
 	public Portal(GameObject go)
 	{
 		portals.Add(this);
-		id = this.GetHashCode();
+		id = this.GetHashCode(); // Hmm
 
 		transform	= go.GetComponent<Transform>();
 		renderer	= go.GetComponent<Renderer>();

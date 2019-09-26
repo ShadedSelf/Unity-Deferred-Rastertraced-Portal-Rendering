@@ -9,18 +9,18 @@ public class Get : MonoBehaviour
     public int resolution = 512;
     public RenderTextureFormat format = RenderTextureFormat.RHalf;
     public RenderTexture shadowMapRT;
-    public Mesh s_quadMesh;
+    public Mesh quadMesh;
     public ComputeShader cs;
 
 
-    Material getMatrixMat;
-    Material getShadowMat;
+    private Material getMatrixMat;
+    private Material getShadowMat;
 
-    ComputeBuffer cb;
-    CommandBuffer getMatrixCMD;
-    CommandBuffer getShadowMapCMD;
+    private ComputeBuffer cb;
+    private CommandBuffer getMatrixCMD;
+    private CommandBuffer getShadowMapCMD;
 
-    Light l;
+    private Light l;
 
     [ContextMenu("Reload")]
     void OnEnable()
@@ -37,7 +37,7 @@ public class Get : MonoBehaviour
         getMatrixCMD.name = "Get Shadow Matrix";
 
         getMatrixCMD.SetRandomWriteTarget(1, cb);
-        getMatrixCMD.DrawMesh(s_quadMesh, Matrix4x4.identity, getMatrixMat, 0);
+        getMatrixCMD.DrawMesh(quadMesh, Matrix4x4.identity, getMatrixMat, 0);
         getMatrixCMD.ClearRandomWriteTargets();
         //
         shadowMapRT = new RenderTexture(resolution, resolution, 0, format, RenderTextureReadWrite.Linear);

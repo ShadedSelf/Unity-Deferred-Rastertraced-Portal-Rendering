@@ -61,17 +61,27 @@ public class Vol : MonoBehaviour
         Shader.SetGlobalMatrix("_iLTWF", cam.projectionMatrix * cam.worldToCameraMatrix);
         Shader.SetGlobalFloat("_POW", pow);
 
-        Vector4[] origins = new Vector4[4] { cam.ScreenPointToRay(new Vector3(0, Screen.height - 1, 0)).origin, cam.ScreenPointToRay(new Vector3(Screen.width - 1, Screen.height - 1, 0)).origin,
-            cam.ScreenPointToRay(new Vector3(0, 0, 0)).origin, cam.ScreenPointToRay(new Vector3(Screen.width - 1, 0, 0)).origin};
+        Vector4[] origins = new Vector4[4]
+		{
+			cam.ScreenPointToRay(new Vector3(0, Screen.height - 1, 0)).origin,
+			cam.ScreenPointToRay(new Vector3(Screen.width - 1, Screen.height - 1, 0)).origin,
+            cam.ScreenPointToRay(new Vector3(0, 0, 0)).origin,
+			cam.ScreenPointToRay(new Vector3(Screen.width - 1, 0, 0)).origin
+		};
         Shader.SetGlobalVectorArray("_Origins", origins);
         cs.SetVectorArray("_Origins", origins);
 
-        Vector4[] directions = new Vector4[4] { cam.ScreenPointToRay(new Vector3(0, Screen.height - 1, 0)).direction, cam.ScreenPointToRay(new Vector3(Screen.width - 1, Screen.height - 1, 0)).direction,
-            cam.ScreenPointToRay(new Vector3(0, 0, 0)).direction,cam.ScreenPointToRay(new Vector3(Screen.width - 1, 0, 0)).direction};
+        Vector4[] directions = new Vector4[4]
+		{
+			cam.ScreenPointToRay(new Vector3(0, Screen.height - 1, 0)).direction,
+			cam.ScreenPointToRay(new Vector3(Screen.width - 1, Screen.height - 1, 0)).direction,
+            cam.ScreenPointToRay(new Vector3(0, 0, 0)).direction,
+			cam.ScreenPointToRay(new Vector3(Screen.width - 1, 0, 0)).direction
+		};
         Shader.SetGlobalVectorArray("_Directions", directions);
         cs.SetVectorArray("_Directions", directions);
 
-        Shader.SetGlobalFloat("_EdgeDis", Vector3.Distance(cam.ScreenToWorldPoint(new Vector3(0, 0, cam.nearClipPlane)), cam.ScreenToWorldPoint(new Vector3(0, 0, cam.farClipPlane))));
+        // Shader.SetGlobalFloat("_EdgeDis", Vector3.Distance(cam.ScreenToWorldPoint(new Vector3(0, 0, cam.nearClipPlane)), cam.ScreenToWorldPoint(new Vector3(0, 0, cam.farClipPlane))));
 
         cs.SetFloat("_DT", Time.deltaTime);
 

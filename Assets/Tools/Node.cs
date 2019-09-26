@@ -26,24 +26,4 @@ public class Node<T>// : IEnumerable?
 		children.Add(node);
 		node.parent = this;
 	}
-
-	// Move out
-	// public int MaxTreeDepth() => MaxDepthFrom(root);
-	// public int MaxDepthFrom(Node<T> node)
-	// {
-	// 	int c = 0;
-	// 	foreach (var n in node.children)
-	// 		c = max(MaxDepthFrom(n), c);
-	// 	return c + 1;
-	// }
-
-	// public int MaxTreeChildrenCount() => MaxChildrenCountFrom(root);
-	// public int MaxChildrenCountFrom(Node<T> node)
-	// {
-	// 	int c = children.Count;
-	// 	foreach (var n in node.children)
-	// 		c = max(MaxChildrenCountFrom(n), c);
-	// 	return c;
-	// }
-	// Out move
 }

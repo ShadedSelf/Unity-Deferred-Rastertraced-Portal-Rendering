@@ -57,14 +57,14 @@
 				depth = pow(depth, 1 / _POW);
 				//depth = 0;
 				float3 uvs = (rand(float3(i.uv.xy, depth) * _Time.x) * 2 - .5) * .005;
-				//uvs = 0;
+				uvs = 0;
 				float col = tex3D(_Volume, float3(i.uv, depth) + uvs).x;
 				// col += (rand(float3(i.uv.xy, depth) * _Time.x) * 2 - .5) * .01;
 
 				// //depth = Linear01Depth(tex2D(_CameraDepthTexture, i.uv).r);
 
 				// float4 ac = tex2D(_MainTex, i.uv);
-				// col = col * ac * 1.5;
+				// col = lerp(col, ac, 0.5);
 
 				return col;
 			}

@@ -1,10 +1,10 @@
 ﻿RWTexture3D<float> _Volume;
 StructuredBuffer<float4x4> _B;
 
-Texture2D<half> _LightDepthMap;
+Texture2D<float> _LightDepthMap;
 SamplerState sampler_LightDepthMap;
 
-Texture2D<half> _Temp;
+Texture2D<float> _Temp;
 SamplerState sampler_Temp;
 
 float4x4 _LocalToWorldFrustrum;
@@ -42,34 +42,34 @@ inline float rand(float p)
 [numthreads(8, 8, 8)]
 void Volume(uint3 id : SV_DispatchThreadID)
 {
-	/*float4 objectPos = float4((float3)id.xyz / (float)127 - .5, .5);   //UseMe?
-	objectPos.z = pow(objectPos.z + .5, _POW) - .5;
-	objectPos *= 2;
+	// float4 objectPos = float4((float3)id.xyz / (float3)(_Res - 1) - .5, .5);   //UseMe?
+	// objectPos *= 2;
+	// objectPos.z = pow(objectPos.z, _POW);
 
-	float4 worldPos = mul(_LocalToWorldFrustrum, objectPos);
-	worldPos.xyz = worldPos.xyz / worldPos.w;*/
+	// float4 worldPos = mul(_LocalToWorldFrustrum, objectPos);
+	// worldPos.xyz = worldPos.xyz / worldPos.w;
 
 	float4 objectPos = float4((float3)id.xyz / (float3)(_Res - 1), 1);
+	// objectPos.xyz += (rand(objectPos.xyz * _DT) * 2 - 1) * 0.0000001;
 
 	float4 O = lerp(lerp(_Origins[2], _Origins[3], objectPos.x), lerp(_Origins[0], _Origins[1], objectPos.x), objectPos.y);
 	float4 D = lerp(lerp(_Directions[2], _Directions[3], objectPos.x), lerp(_Directions[0], _Directions[1], objectPos.x), objectPos.y);
 
 	float4 worldPos = O + D * pow(objectPos.z, _POW) * _EdgeDis;
-	worldPos.xyz += (rand(worldPos.xyz * _DT) * 2 - .5) * .1;
+	worldPos.xyz += (rand(worldPos.xyz * _DT) * 2 - 1) * 0.25;
+
 	float4 projCoords = mul(_B[0], float4(worldPos.xyz, 1));
 
 	float fragDepth = projCoords.z;
-	float lightDepth = _LightDepthMap.GatherRed(sampler_LightDepthMap, (projCoords.xy / projCoords.w) + ((rand(projCoords.xy * _DT) * 2 - .5) * .0001), 0).x;
+	float lightDepth = _LightDepthMap.GatherRed(sampler_LightDepthMap, (projCoords.xy / projCoords.w) /*+ ((rand(projCoords.xy * _DT) * 2 - .5) * .0001)*/, 0).x;
 
-	float ret = 1;
-	if (lightDepth > fragDepth)
-		ret = 0;
+	float ret = (lightDepth > fragDepth) ? 0 : 1;
 
 	float prevP = max(((float)id.z - 1.0), 0.0) / (float)_Res.z;
 	float st = pow(objectPos.z, _POW) - pow(prevP, _POW);
 
 
-	_Volume[id.xyz] = ret * _EdgeDis * st / 200 + (length((rand(worldPos.xyz * _DT)) * 2 - .5) * .001);
+	_Volume[id.xyz] = ret * _EdgeDis * st / 200 + (length((rand(worldPos.xyz * _DT)) * 2 - .5) * 0.00025);
 
 	/*float depth = _Temp.SampleLevel(sampler_Temp, objectPos.xy, 0);
 	depth = 1.0 / (_DepthParams.z * depth + _DepthParams.w);

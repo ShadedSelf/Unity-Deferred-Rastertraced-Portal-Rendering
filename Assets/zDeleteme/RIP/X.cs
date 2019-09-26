@@ -41,8 +41,8 @@ public class X : MonoBehaviour
 
 		system = new ComputeSystem(shader);
 		system.AddKernel("Do", new Vector3Int(num.x, num.y , 1));
-		// system.data.AddRenderTexture("u", new Vector3Int(num.x, num.y, 0), RenderTextureFormat.RFloat);
-		// system.data.AddRenderTexture("v", new Vector3Int(num.x, num.y, 0), RenderTextureFormat.RFloat);
+		system.data.AddRenderTexture("u", GpuUtils.GetRenderTexture(num.x, num.y, 0, true, RenderTextureFormat.RFloat));
+		system.data.AddRenderTexture("v", GpuUtils.GetRenderTexture(num.x, num.y, 0, true, RenderTextureFormat.RFloat));
 		system.data.AddBuffer("buff", num.x * num.y, sizeof(float) * 4 * 2);
 		system.data.AddBuffer("test", 1, sizeof(float));
 

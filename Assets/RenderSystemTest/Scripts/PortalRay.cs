@@ -118,10 +118,6 @@ public static class PortalRay
 				Vector3 uv = float3(float2(i, j) / (res - 1), 0);
 				Ray ray = cam.ViewportPointToRay(uv);
 
-				// Vector3 wPos = cam.ViewportToWorldPoint(uv);
-				// Vector3 wPos = cam.TrueViewportToWorldPoint(uv);
-				// Ray ray = new Ray(cam.transform.position, (wPos - cam.transform.position).normalized);
-					
 				if (PortalRay.CastPortalRay(ray, out var rayPath))
 					MergeRayPath(map, rayPath);
 			}

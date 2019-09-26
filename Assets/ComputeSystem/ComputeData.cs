@@ -5,26 +5,24 @@ using UnityEngine;
 
 public class ComputeData
 {
-	private Dictionary<string, ComputeBuffer> _buffers	= new Dictionary<string, ComputeBuffer>();
-	private Dictionary<string, RenderTexture> _textures	= new Dictionary<string, RenderTexture>();
-
-	public IReadOnlyDictionary<string, ComputeBuffer> buffers	=> _buffers as IReadOnlyDictionary<string, ComputeBuffer>;
-	public IReadOnlyDictionary<string, RenderTexture> textures	=> _textures as IReadOnlyDictionary<string, RenderTexture>;
+	public Dictionary<string, ComputeBuffer> buffers	{ get; private set; } = new Dictionary<string, ComputeBuffer>();
+	public Dictionary<string, RenderTexture> textures	{ get; private set; } = new Dictionary<string, RenderTexture>();
 
 	//-- Add: -----------------
-	public void AddBuffer(string name, int count, int stride)				=> _buffers.Add(name, new ComputeBuffer(count, stride));
-	public void AddBuffer(string name, ComputeBuffer buffer)				=> _buffers.Add(name, buffer);
+	public void AddBuffer(string name, int count, int stride)				=> buffers.Add(name, new ComputeBuffer(count, stride));
+	public void AddBuffer(string name, ComputeBuffer buffer)				=> buffers.Add(name, buffer);
 
-	public void AddRenderTexture(string name, RenderTextureDescriptor desc)	=> _textures.Add(name, new RenderTexture(desc));
-	public void AddRenderTexture(string name, RenderTexture rt)				=> _textures.Add(name, rt);
+	public void AddRenderTexture(string name, RenderTextureDescriptor desc)	=> textures.Add(name, new RenderTexture(desc));
+	public void AddRenderTexture(string name, RenderTexture rt)				=> textures.Add(name, rt);
 
 	//-- Clean: ---------------
 	public void Cleanup()
 	{
-		foreach (var buffer in _buffers)	{ buffer.Value.Release();	}
-		foreach (var texture in _textures)	{ texture.Value.Release();	}
-		_buffers.Clear();
-		_textures.Clear();
+		foreach (var buffer in buffers)		{ buffer.Value.Release();	}
+		foreach (var texture in textures)	{ texture.Value.Release();	}
+		
+		buffers.Clear();
+		textures.Clear();
 	}
 }
 

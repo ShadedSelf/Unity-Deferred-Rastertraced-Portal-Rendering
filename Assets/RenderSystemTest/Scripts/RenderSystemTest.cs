@@ -7,22 +7,6 @@ using UnityEngine.Rendering;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-public static partial class GpuUtils
-{
-	public static RenderTexture GetRenderTexture(int width, int height, int depth, bool writable = false, RenderTextureFormat format = RenderTextureFormat.ARGBFloat)
-	{
-		var rt = new RenderTexture(width, height, depth, format);
-		rt.enableRandomWrite = writable;
-		rt.Create();
-		return rt;
-	}
-
-	public static RenderTexture GetScreenRenderTexture(int depth, bool writable = false, RenderTextureFormat format = RenderTextureFormat.ARGBFloat)
-	{
-		return GetRenderTexture(Screen.width, Screen.height, depth, writable, format);
-	}
-}
-
 public enum DefferredBufferID
 {
 	TemporayEditor,
@@ -152,9 +136,8 @@ public class RenderSystemTest
 
 				cam.transform.SetPositionAndRotation(vPos, vRot);
 				cam.ResetProjectionMatrix();
-				// float testN = trs.scale.x * (portal.other.transform.lossyScale.x / portal.transform.lossyScale.x);
-				// cam.projectionMatrix = cam.CalculateObliqueMatrix(cam.CameraSpacePlane(portal.other.transform.position, portal.other.transform.forward, -1, 0.09f * testN));
-				cam.projectionMatrix = cam.CalculateObliqueMatrix(cam.CameraSpacePlane(portal.other.transform.position, portal.other.transform.forward, -1, 0f));
+				float testN = trs.scale.x * (portal.other.transform.lossyScale.x / portal.transform.lossyScale.x);
+				cam.projectionMatrix = cam.CalculateObliqueMatrix(cam.CameraSpacePlane(portal.other.transform.position, portal.other.transform.forward, -1, 0.09f * testN));
 
 				ContinueRender(new TransformData(vPos, vRot, trs.scale), vMat, prevPID, depth);
 			}
@@ -218,27 +201,6 @@ public class RenderSystemTest
 	}
 }
 
-public static class PortalSomething
-{
-	public static Vector3 TrueViewportToWorldPoint(this Camera cam, Vector3 viewPoint) // 0 to 1
-	{
-		Matrix4x4 m = cam.projectionMatrix * cam.worldToCameraMatrix;
-		Vector4 v = float4(viewPoint, 1) * 2 - 1;// new Vector4(viewPoint.x * 2f - 1f, viewPoint.y * 2f - 1f, viewPoint.z * 2f - 1f, 1f);
-		v = m.inverse * v;
-		v /= v.w;
-		return new Vector3(v.x, v.y, v.z);
-	}
-
-	// public static Vector3 TrueWorldToVieportPoint(this Camera cam, Vector3 viewPoint) // 0 to 1
-	// {
-	// 	Matrix4x4 m = cam.projectionMatrix * cam.worldToCameraMatrix;
-	// 	Vector4 v = float4(viewPoint, 1) * 2 - 1;// new Vector4(viewPoint.x * 2f - 1f, viewPoint.y * 2f - 1f, viewPoint.z * 2f - 1f, 1f);
-	// 	v = m * v;
-	// 	v /= v.w;
-	// 	return new Vector3(v.x, v.y, v.z);
-	// }
-
-
 // 	// const int density = 5;
 // 	//Make rays go through
 // 	public static bool IsVisibleFromCam(this Portal portal, Camera cam) //TODO: Optimize, Multithread?, density relative to view angle?, check around previous hitPoint first?
@@ -279,4 +241,3 @@ public static class PortalSomething
 // 		}
 // 		return false;
 // 	}
-}

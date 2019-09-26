@@ -5,22 +5,6 @@ using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-public class TransformData
-{
-	public Vector3 position		{ get; set; } = Vector3.zero;
-	public Quaternion rotation	{ get; set; } = Quaternion.identity;
-	public Vector3 scale		{ get; set; } = Vector3.one;
-
-	public TransformData() { }
-	public TransformData(Transform transform) : this(transform.position, transform.rotation, transform.lossyScale) { }
-	public TransformData(Vector3 position, Quaternion rotation, Vector3 scale)
-	{
-		this.position	= position;
-		this.rotation	= rotation;
-		this.scale		= scale;
-	}
-}
-
 public class Controller : MonoBehaviour, IPortableObject
 {
 	[Header("Mouse Settings")]
@@ -38,6 +22,9 @@ public class Controller : MonoBehaviour, IPortableObject
 
 	[Header("Rotator Settings")]
 	public float rotSpeed = 0.15f;
+
+	[Header("Render Settings")]
+	public bool lazyRender = false;
 
 	//-- Globals: ----------------------
 	public static Camera currentCamera;
@@ -65,23 +52,19 @@ public class Controller : MonoBehaviour, IPortableObject
 		cam					= GetComponentInChildren<Camera>();
 		pivotTrs			= transform.GetChild(0).transform;
 		camTrs				= cam.transform;
-		cam.nearClipPlane	= 0.00001f;
+		cam.nearClipPlane	= 0.00001f; // Fix
 		currentCamera		= cam;
 
 		camCntrl	= new CameraController(pivotTrs, camTrs);
-		mover		= new MovementController(transform, pivotTrs);
+		mover		= new MovementController(rb, transform, pivotTrs);
 		rotator		= new RotatorController(transform);
 		
 		renderTest	= new RenderSystemTest();
 
 		UpdateSettings();
 
-		// Physics.autoSimulation = false;
-		// Physics.autoSyncTransforms = false;
-		Time.fixedDeltaTime = 0.01f;
-
+		Time.fixedDeltaTime = 0.01f; // Fix, use custom fixed update + Physics.Simulate()
 		rb.solverIterations = 32;
-		// scale = 0.1f;
 	}
 
 	public void UpdateSettings()
@@ -98,7 +81,7 @@ public class Controller : MonoBehaviour, IPortableObject
 		rotator.rotSpeed	= rotSpeed;
 	}
 
-    void Update()
+    void Update() //Fix, move everythin to a CustomFixedUpdate
     {
 		camCntrl.Lock();
 		camCntrl.Rotate(Time.deltaTime);
@@ -108,6 +91,9 @@ public class Controller : MonoBehaviour, IPortableObject
 		rotator.RotateBody(down, Time.deltaTime); //Lock rotation till reaches new normal
 		var rel = Quaternion.Inverse(rot) * camTrs.rotation; //Relative
 		camCntrl.Correct(rel);
+
+		if (Input.GetKeyDown(KeyCode.Space))
+			mover.Jump();
     }
 
 	void FixedUpdate()
@@ -118,22 +104,22 @@ public class Controller : MonoBehaviour, IPortableObject
 
 	void LateUpdate()
 	{
-
 		renderTest.ClearBuffers();
 		renderTest.SetInitialTransform(camTrs);
 
 		var matrix = Matrix4x4.Scale(float3(1f / scale));
 
-		// var map = PortalRay.GetPortalMap(cam);
-		// renderTest.RenderPortalMap(map, new TransformData(camTrs), matrix, 0, 0); //Allocations
-		// PortalRay.ClearAndReleaseRecursiveDown(map);
-
-		renderTest.LazyRender(new TransformData(camTrs), matrix, 0, 0);
-
+		if (lazyRender)
+		{
+			renderTest.LazyRender(new TransformData(camTrs), matrix, 0, 0);
+		}
+		else
+		{
+			var map = PortalRay.GetPortalMap(cam);
+			renderTest.RenderPortalMap(map, new TransformData(camTrs), matrix, 0, 0); // Fix allocations
+			PortalRay.ClearAndReleaseRecursiveDown(map);
+		}
 		renderTest.Edge();
-
-		// dynamic why = 0;
-		// why.HelpMeNotToCrash(); //int extension
 	}
 
 	void OnGUI()
@@ -149,6 +135,7 @@ public class Controller : MonoBehaviour, IPortableObject
 
 	void OnDrawGizmos()
 	{
-
+		// dynamic why = 0;
+		// why.HelpMeNotToCrash(); //int extension
 	}
 }

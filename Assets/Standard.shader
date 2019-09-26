@@ -48,9 +48,9 @@
 				float c = dot(rd, i.normal.xyz);
 				// c = 1;
 
-				o.editor	= float4((float3)c, 1);
+				o.editor	= float4((float3)c * 0.5 + 0.5, 1);
 				o.normals	= float4(i.normal.xyz, 1);
-				o.position	= float4(i.wPos.xyz, 1);
+				o.position	= float4(i.wPos.xyz, c);
 				o.renderID	= (float4)0;
 
 				return o;

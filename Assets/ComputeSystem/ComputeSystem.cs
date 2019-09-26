@@ -17,10 +17,10 @@ public class ComputeSystem
 		this.profile	= profile;
 	}
 
-	//-- Add: -----------------------------------------------------------------------------------------------------------------------
+	//-- Add: -----------------
 	public void AddKernel(string name, Vector3Int threads) => kernels.Add(name, new ComputeKernel(name, shader, threads));
 
-	//-- Set: -----------------------------------------------------------------------------------------------------------------------
+	//-- Set: -----------------
 	public void BindComputeData() => BindComputeData(data);
 	public void BindComputeData(ComputeData data)
 	{
@@ -37,11 +37,11 @@ public class ComputeSystem
 	public void SetRenderTexture(string kernel, string textureName)						=> kernels[kernel].SetTexture(textureName, data.textures[textureName]);
 	public void SetRenderTexture(string kernel, string textureName, RenderTexture rt)	=> kernels[kernel].SetTexture(textureName, rt);
 
-	//-- Dispatch: ------------------------------------------------------------------------------------------------------------------
+	//-- Dispatch: ------------
 	public void Dispatch(string kernel)								=> kernels[kernel].Dispacth();
 	public void RecordDispatch(string kernel, CommandBuffer cmdBuf) => kernels[kernel].RecordDispatch(cmdBuf, profile);
 
-	//-- Clean: ---------------------------------------------------------------------------------------------------------------------
+	//-- Clean: ---------------
 	public void Cleanup()
 	{
 		data.Cleanup();

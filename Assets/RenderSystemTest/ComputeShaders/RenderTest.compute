@@ -28,9 +28,9 @@ void FindEdges (uint3 id : SV_DispatchThreadID)
 
 	float3 combo = max(max(max(test0, test1), test2), test3);
 	float l = length(combo);
-	// l = pow(l, 0.25);
+	l = pow(l, 0.25);
 
-	_Result[id.xy] = float4(l.xxx * 0.05, 1);
+	_Result[id.xy] = float4(l.xxx * 0.5, 1);
 	// _Result[id.xy] = float4(combo * 0.5, 1);
 
 	// int4 iCenter	= round(pids[flatten(id.xy)]);

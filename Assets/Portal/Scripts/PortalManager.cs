@@ -46,16 +46,9 @@ public class PortalManager : MonoBehaviour
 		portal.Dispose();
 	}
 
-	// void OnDrawGizmos()
-	// {
-	// 	Gizmos.color = Color.blue;
-
-	// 	var bound = GetComponent<Collider>().bounds;
-	// 	Gizmos.DrawWireCube(bound.center, bound.size);
-	// }
 }
 
-public static class AAA
+public static class DoAtSomePoint
 {
 	public static bool IntersectsPortalBounds(this IPortableObject ob, Portal portal)
 	{

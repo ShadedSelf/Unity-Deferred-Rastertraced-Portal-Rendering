@@ -16,4 +16,13 @@ public static class CameraExtensions
 		Vector3 cnormal = m.MultiplyVector(normal).normalized * sideSign;
 		return float4(cnormal, -dot(cpos, cnormal));
 	}
+
+	public static Vector3 TrueViewportToWorldPoint(this Camera cam, Vector3 viewPoint) // 0 to 1
+	{
+		Matrix4x4 m = cam.projectionMatrix * cam.worldToCameraMatrix;
+		float4 v = float4(viewPoint, 1) * 2 - 1;
+		v = m.inverse * v;
+		v /= v.w;
+		return v.xyz;
+	}
 }

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public static class WireDraw
 {
-	public static Material mat;
+	public static Material mat = new Material(Shader.Find("Hidden/Internal-Colored"));
 
-	static List<Vector3> vectors = new List<Vector3>();
+	private static List<Vector3> vectors = new List<Vector3>();
 
-	public static void Print()
+	public static void Draw()
 	{
 		GL.PushMatrix();
 		mat.SetPass(0);
